@@ -1,0 +1,40 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Chat Go</title>
+  <style>
+    #log {height:300px; overflow-y:scroll; border:1px solid #ccc; padding:4px;}
+  </style>
+</head>
+<body>
+  <h2>Chat Go – WebSocket</h2>
+  <input id="user" placeholder="pseudo" value="Anonyme">
+  <input id="msg"  placeholder="message">
+  <button id="send">Envoyer</button>
+  <div id="log"></div>
+
+  <script>
+    const user = document.getElementById('user');
+    const msg  = document.getElementById('msg');
+    const log  = document.getElementById('log');
+    const send = document.getElementById('send');
+
+    const ws = new WebSocket('ws://localhost:8080/ws?username='+encodeURIComponent(user.value));
+
+    ws.onmessage = ev => {
+      const m = JSON.parse(ev.data);
+      log.innerHTML += `<div><b>${m.username}</b> : ${m.content}</div>`;
+      log.scrollTop = log.scrollHeight;
+    };
+
+    send.onclick = () => {
+      if (msg.value) {
+        ws.send(JSON.stringify({content: msg.value}));
+        msg.value = '';
+      }
+    };
+    msg.addEventListener('keyup', e => { if (e.key==='Enter') send.click(); });
+  </script>
+</body>
+</html>

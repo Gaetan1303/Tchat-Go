@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat de Proximité</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            height: 80vh;
+            max-height: 700px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px 12px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 20px;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            background: #4ade80;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f9fafb;
+        }
+
+        .message {
+            margin-bottom: 12px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.own {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 10px 14px;
+            border-radius: 12px;
+            word-wrap: break-word;
+        }
+
+        .message.own .message-content {
+            background: #667eea;
+            color: white;
+            border-radius: 12px 0 12px 12px;
+        }
+
+        .message.other .message-content {
+            background: #e5e7eb;
+            color: #1f2937;
+            border-radius: 0 12px 12px 12px;
+        }
+
+        .message-info {
+            font-size: 12px;
+            margin-top: 4px;
+            color: #6b7280;
+            display: flex;
+            gap: 8px;
+        }
+
+        .message.own .message-info {
+            justify-content: flex-end;
+            color: #9ca3af;
+        }
+
+        .input-area {
+            padding: 16px;
+            border-top: 1px solid #e5e7eb;
+            background: white;
+            border-radius: 0 0 12px 12px;
+        }
+
+        .username-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+
+        .username-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .input-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .message-input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            resize: none;
+            max-height: 100px;
+        }
+
+        .message-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .send-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .send-btn:active {
+            transform: scale(0.95);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .connection-status {
+            text-align: center;
+            padding: 10px;
+            font-size: 12px;
+            background: #fef3c7;
+            color: #92400e;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+
+        .connection-status.connected {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .connection-status.disconnected {
+            background: #fee2e2;
+            color: #7f1d1d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💬 Chat Proximité</h1>
+            <div class="status">
+                <div class="status-indicator"></div>
+                <span id="user-count">0 en ligne</span>
+            </div>
+        </div>
+
+        <div class="messages-container" id="messages"></div>
+
+        <div class="input-area">
+            <input 
+                type="text" 
+                id="username" 
+                class="username-input" 
+                placeholder="Votre pseudo (optionnel)"
+                maxlength="20"
+            >
+            <div id="connectionStatus" class="connection-status disconnected">
+                ⏳ Connexion...
+            </div>
+            <div class="input-group">
+                <textarea 
+                    id="message-input" 
+                    class="message-input" 
+                    placeholder="Écrivez votre message..." 
+                    rows="1"
+                    disabled
+                ></textarea>
+                <button id="send-btn" class="send-btn" disabled>Envoyer</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const messagesDiv = document.getElementById('messages');
+        const messageInput = document.getElementById('message-input');
+        const sendBtn = document.getElementById('send-btn');
+        const usernameInput = document.getElementById('username');
+        const userCountSpan = document.getElementById('user-count');
+        const connectionStatus = document.getElementById('connectionStatus');
+
+        let ws = null;
+        let username = '';
+
+        // Demander la permission pour les notifications
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+
+        function connectWebSocket() {
+            username = usernameInput.value.trim() || `User_${Math.random().toString(36).substr(2, 9)}`;
+            
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${protocol}//${window.location.host}/ws?username=${encodeURIComponent(username)}`;
+            
+            ws = new WebSocket(wsUrl);
+
+            ws.onopen = () => {
+                console.log('Connecté au serveur');
+                connectionStatus.textContent = '✅ Connecté';
+                connectionStatus.className = 'connection-status connected';
+                messageInput.disabled = false;
+                sendBtn.disabled = false;
+                usernameInput.disabled = true;
+            };
+
+            ws.onmessage = (event) => {
+                const msg = JSON.parse(event.data);
+                displayMessage(msg);
+                
+                // Notification système si c'est un autre utilisateur
+                if (msg.username !== username && 'Notification' in window && Notification.permission === 'granted') {
+                    new Notification(`Message de ${msg.username}`, {
+                        body: msg.content,
+                        icon: '💬'
+                    });
+                }
+            };
+
+            ws.onerror = (error) => {
+                console.error('Erreur WebSocket:', error);
+                connectionStatus.textContent = '❌ Erreur de connexion';
+                connectionStatus.className = 'connection-status disconnected';
+            };
+
+            ws.onclose = () => {
+                console.log('Déconnecté du serveur');
+                connectionStatus.textContent = '❌ Déconnecté';
+                connectionStatus.className = 'connection-status disconnected';
+                messageInput.disabled = true;
+                sendBtn.disabled = true;
+                usernameInput.disabled = false;
+                userCountSpan.textContent = '0 en ligne';
+                
+                // Tentative de reconnexion après 3 secondes
+                setTimeout(connectWebSocket, 3000);
+            };
+        }
+
+        function displayMessage(msg) {
+            const isOwn = msg.username === username;
+            const div = document.createElement('div');
+            div.className = `message ${isOwn ? 'own' : 'other'}`;
+
+            const time = new Date(msg.timestamp).toLocaleTimeString('fr-FR', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+
+            div.innerHTML = `
+                <div>
+                    <div class="message-content">${escapeHtml(msg.content)}</div>
+                    <div class="message-info">
+                        <span>${msg.username}</span>
+                        <span>${time}</span>
+                    </div>
+                </div>
+            `;
+
+            messagesDiv.appendChild(div);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function sendMessage() {
+            const content = messageInput.value.trim();
+            if (!content || !ws || ws.readyState !== WebSocket.OPEN) return;
+
+            const msg = {
+                content: content,
+                username: username
+            };
+
+            ws.send(JSON.stringify(msg));
+            messageInput.value = '';
+            messageInput.style.height = 'auto';
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Auto-resize textarea
+        messageInput.addEventListener('input', () => {
+            messageInput.style.height = 'auto';
+            messageInput.style.height = Math.min(messageInput.scrollHeight, 100) + 'px';
+        });
+
+        // Envoyer au clic du bouton
+        sendBtn.addEventListener('click', sendMessage);
+
+        // Envoyer avec Shift+Enter ou Ctrl+Enter
+        messageInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && (e.ctrlKey || e.shiftKey)) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Envoyer avec Enter seul
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.ctrlKey && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Connexion initiale au démarrage
+        connectWebSocket();
+
+        // Mettre à jour le nombre d'utilisateurs (simulé, à améliorer avec un endpoint)
+        setInterval(() => {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                fetch('/status')
+                    .then(r => r.json())
+                    .then(data => {
+                        userCountSpan.textContent = `${data.connected_users} en ligne`;
+                    })
+                    .catch(e => console.error('Erreur statut:', e));
+            }
+        }, 5000);
+    </script>
+</body>
+</html>
