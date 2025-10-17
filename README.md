@@ -7,7 +7,7 @@ Il utilise :
     la librairie gorilla/websocket (téléchargée automatiquement)
     une page HTML/JS côté client
 
-1. Prérequis
+# Prérequis
 Table
 Copy
 Outil	Version minimale	Lien / Commande de vérification
@@ -17,7 +17,7 @@ Git	2.x (facultatif mais recommandé)	git --version
     Sous Windows, préférez l’installateur officiel (MSI) :
     https://go.dev/dl/
 
-2. Installation de Go
+# Installation de Go
 Ubuntu / Debian
 bash
 Copy
@@ -26,17 +26,17 @@ sudo apt update
 sudo apt install golang-go
 go version
 
-3. Cloner / créer le projet
+# Cloner / créer le projet
 bash
 Copy
 
-# 1. Créer un dossier
+#  Créer un dossier
 mkdir chat-go && cd chat-go
 
-# 2. Initialiser le module Go (nom du module = chat-go)
+# Initialiser le module Go (nom du module = chat-go)
 go mod init chat-go
 
-# 3. Créer le fichier main.go
+# Créer le fichier main.go
 #    → Copier-coller le contenu fourni plus haut
 #    (ou : wget https://raw.githubusercontent.com/votre fork/main.go)
 
