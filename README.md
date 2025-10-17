@@ -1,92 +1,114 @@
-# Tchat-Go
-📦 Chat WebSocket Go – README complet
-Ce petit projet est un serveur de chat temps-réel écrit en Go.
-Il utilise :
+💬 Tchat-Go : Serveur de Chat Temps-Réel avec Web Socket (Go)
 
-    le langage Go 1.20+
-    la librairie gorilla/websocket (téléchargée automatiquement)
-    une page HTML/JS côté client
+Ce petit projet est un serveur de chat temps-réel minimaliste, écrit en Go, utilisant le protocole Web Socket pour une communication bidirectionnelle instantanée.
 
-# Prérequis
-Table
-Copy
-Outil	Version minimale	Lien / Commande de vérification
-Go	1.20	go version
-Git	2.x (facultatif mais recommandé)	git --version
+Il repose sur :
 
-    Sous Windows, préférez l’installateur officiel (MSI) :
-    https://go.dev/dl/
+    Le langage Go (version 1.20+)
 
-# Installation de Go
-Ubuntu / Debian
-bash
-Copy
+    La librairie gorilla/websocket (téléchargée automatiquement)
+
+    Une interface client en HTML/JS pour le navigateur.
+
+🛠️ 1. Prérequis et Installation
+
+Assurez-vous d'avoir les outils suivants installés sur votre système.
+Outil	Version minimale	Commande de vérification	Note
+Go	1.20	go version	L'installateur officiel (MSI) est recommandé sous Windows.
+Git	2.x (facultatif)	git --version	
+
+Installation de Go (Exemple pour Ubuntu / Debian)
+
+Bash
 
 sudo apt update
 sudo apt install golang-go
 go version
 
-# Cloner / créer le projet
-bash
-Copy
+🚀 2. Démarrage Rapide
 
-#  Créer un dossier
+Suivez ces étapes pour mettre en place et lancer le serveur de chat.
+
+2.1. Créer et Initialiser le Projet
+
+Bash
+
+# Créer le dossier
 mkdir chat-go && cd chat-go
 
-# Initialiser le module Go (nom du module = chat-go)
+# Initialiser le module Go
 go mod init chat-go
 
-# Créer le fichier main.go
-#    → Copier-coller le contenu fourni plus haut
-#    (ou : wget https://raw.githubusercontent.com/votre fork/main.go)
+2.2. Structure des Fichiers
 
-# 4. Créer le dossier qui contiendra la page HTML
+Créez les fichiers et dossiers nécessaires :
+
+    main.go : Copiez-collez votre code source du serveur Go ici.
+
+    static/index.html : Créez le dossier static et placez la page HTML/JS du client à l'intérieur.
+
+Bash
+
 mkdir static
+# Créez/collez le contenu de index.html dans ce dossier
 
-5. Télécharger les dépendances
-bash
-Copy
+2.3. Télécharger les Dépendances
+
+La commande go mod tidy télécharge automatiquement la librairie gorilla/websocket et met à jour les fichiers de module (go.mod et go.sum).
+Bash
 
 go mod tidy
 
-    Cette commande :
+2.4. Lancer le Serveur
 
-        analyse les imports de votre code
-        télécharge gorilla/websocket dans le cache Go
-        génère/maj go.mod et go.sum
-
-6. Lancer le serveur
-bash
-Copy
+Exécutez l'application directement avec la commande go run.
+Bash
 
 go run .
 
-Vous devez voir :
+Si le démarrage est réussi, vous verrez :
+
 2025/10/17 14:23:45 Serveur démarré sur http://localhost:8080
-7. Tester
 
-    Ouvrez plusieurs onglets de votre navigateur sur :
-    http://localhost:8080
-    Choisissez un pseudo, tapez un message, « Envoyer ».
-    Les messages apparaissent instantanément dans tous les onglets.
+✅ 3. Tester l'Application
 
-Route utilitaire :
-http://localhost:8080/status
-→ renvoie un JSON {connected_users: X, timestamp: "... "}
-8. Build & run « en production »
-bash
-Copy
+3.1. Accéder au Chat
 
-# Compiler un binaire natif
+Ouvrez plusieurs onglets de votre navigateur à l'adresse suivante :
+
+➡️ http://localhost:8080
+
+    Choisissez un pseudo, tapez un message, et cliquez sur « Envoyer ».
+
+    Les messages devraient apparaître instantanément dans tous les onglets ouverts, confirmant la connexion Web Socket temps-réel.
+
+3.2. Route de Statut Utilitaires
+
+Vous pouvez vérifier l'état du serveur via cette route :
+
+    URL : http://localhost:8080/status
+
+    Résultat : Renvoie un JSON d'état : {"connected_users": X, "timestamp": "... "}
+
+📦 4. Compilation et Binaire Autonome
+
+Pour déployer le serveur sans avoir Go installé sur la machine cible (mode production), compilez un binaire natif.
+
+4.1. Compiler
+
+Bash
+
 go build -o chat-server .
 
-# Lancer
-./chat-server        # Linux / macOS
-chat-server.exe      # Windows
+4.2. Lancer le Binaire
 
-Le binaire est autonome (pas besoin de Go installé sur la machine cible).
-9. Arborescence finale
-Copy
+Système	Commande
+Linux / macOS	./chat-server
+Windows	chat-server.exe
+
+4.3. Arborescence Finale
+
+Le binaire chat-server est créé à la racine du projet.
 
 chat-go/
 ├─ go.mod
@@ -94,22 +116,21 @@ chat-go/
 ├─ main.go
 ├─ static/
 │  └─ index.html
-└─ chat-server      (binaire créé par go build)
+└─ chat-server      # Le binaire exécutable créé par 'go build'
 
-10. Commandes utiles
-Table
-Copy
+⚙️ 5. Commandes Go Utiles
+
 But	Commande
 Mettre à jour les dépendances	go get -u ./...
 Voir les modules utilisés	go list -m all
-Formater le code	go fmt
-Linter	go vet
+Formater le code Go	go fmt
+Linter (vérification statique)	go vet
 Vider le cache modules	go clean -modcache
-11. Problèmes fréquents
-Table
-Copy
+
+⚠️ 6. Problèmes Fréquents
+
 Erreur	Solution
-go: command not found	Installer Go (voir §2)
-404 / dans le navigateur	Vous avez oublié le dossier static/index.html
-websocket: bad handshake	Vérifier l’URL JS : ws://localhost:8080/ws
-go mod tidy bloque	Derrière proxy ? go env -w GOPROXY=https://proxy.golang.org,direct
+go: command not found	Installer Go (voir section 1. Prérequis).
+Erreur 404 / dans le navigateur	Vérifier que le dossier static/index.html existe et est correctement placé.
+websocket: bad handshake	Vérifier que l'URL d'initialisation du WebSocket côté JS est bien ws://localhost:8080/ws.
+go mod tidy bloque	Si vous êtes derrière un proxy, configurez la variable : go env -w GOPROXY=https://proxy.golang.org,direct.
